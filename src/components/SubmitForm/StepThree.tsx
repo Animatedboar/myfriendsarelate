@@ -1,13 +1,10 @@
 'use client'
 
-import type { FormData, ExcuseType, CouldHaveAvoided, Apologised, Forgiven, ScoreComponents } from '../../../lib/types'
-import VerdictBadge from '../VerdictBadge'
-import ScoreBreakdown from '../ScoreBreakdown'
+import type { FormData, ExcuseType, CouldHaveAvoided, Apologised, Forgiven } from '../../../lib/types'
 
 interface Props {
   data: FormData
   onChange: (updates: Partial<FormData>) => void
-  liveScore: ScoreComponents | null
 }
 
 const excuseOptions: { value: ExcuseType; label: string; hint: string }[] = [
@@ -41,7 +38,7 @@ const forgivenOptions: { value: Forgiven; label: string }[] = [
   { value: 'unresolved', label: 'Still unresolved' },
 ]
 
-export default function StepThree({ data, onChange, liveScore }: Props) {
+export default function StepThree({ data, onChange }: Props) {
   const hasExcuse = data.excuse_type && data.excuse_type !== 'none'
 
   return (
@@ -150,23 +147,6 @@ export default function StepThree({ data, onChange, liveScore }: Props) {
         />
       </div>
 
-      {liveScore && (
-        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 animate-slide-up">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">
-            Live Score Preview
-          </p>
-          <div className="flex items-center gap-4 mb-6">
-            <VerdictBadge
-              verdict={liveScore.verdict}
-              score={liveScore.finalScore}
-              isExceeded={liveScore.isExceeded}
-              size="md"
-            />
-            <p className="text-sm text-gray-500">Updates as you fill in more details.</p>
-          </div>
-          <ScoreBreakdown scores={liveScore} />
-        </div>
-      )}
     </div>
   )
 }

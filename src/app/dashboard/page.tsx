@@ -29,9 +29,9 @@ async function getStats(): Promise<StatsResponse | null> {
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="rounded-2xl border border-gray-100 p-6">
-      <p className="text-sm font-medium text-gray-400 mb-1">{label}</p>
-      <p className="text-3xl font-black text-navy">{value}</p>
+    <div className="border-2 border-navy p-6">
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{label}</p>
+      <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Syne, sans-serif' }}>{value}</p>
       {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
     </div>
   )
@@ -39,8 +39,8 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-gray-100 p-6">
-      <h2 className="text-base font-bold text-navy mb-4">{title}</h2>
+    <div className="border-2 border-navy p-6">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-navy mb-5">{title}</h2>
       {children}
     </div>
   )
@@ -52,23 +52,23 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
-      <nav className="border-b border-gray-100">
+      <nav className="border-b-2 border-navy">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-navy font-bold text-lg hover:text-ember transition-colors">
+          <Link href="/" className="text-xs font-bold uppercase tracking-widest text-navy hover:text-ember transition-colors"
+            style={{ fontFamily: 'Syne, sans-serif' }}>
             My Friends Are Late
           </Link>
-          <Link href="/submit" className="btn-primary text-sm px-4 py-2">
-            Submit an Entry
+          <Link href="/submit" className="btn-primary py-2 px-5 text-xs">
+            Submit →
           </Link>
         </div>
       </nav>
 
       <main className="max-w-5xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <h1 className="text-3xl font-black text-navy">Live Dashboard</h1>
-          <p className="text-gray-500 mt-2">
-            Real data from every late friend ever submitted. Updated every 5 minutes.
-          </p>
+        <div className="mb-10 pt-2">
+          <p className="text-xs font-bold uppercase tracking-widest text-ember mb-3">Live data</p>
+          <h1 className="text-4xl font-bold text-navy" style={{ fontFamily: 'Syne, sans-serif' }}>Dashboard</h1>
+          <p className="text-gray-400 mt-2 text-sm">Every late friend ever submitted. Updated every 5 minutes.</p>
         </div>
 
         {!stats || stats.totalEntries === 0 ? (

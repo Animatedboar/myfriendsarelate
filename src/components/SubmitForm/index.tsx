@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FormData } from '../../../lib/types'
-import { calculateScore } from '../../../lib/scoring'
 import StepOne from './StepOne'
 import StepTwo from './StepTwo'
 import StepThree from './StepThree'
@@ -71,7 +70,6 @@ export default function SubmitForm() {
     setData((prev) => ({ ...prev, ...updates }))
   }
 
-  const liveScore = calculateScore(data)
   const valid = isStepValid(step, data)
   const isLast = step === STEPS.length - 1
 
@@ -142,7 +140,7 @@ export default function SubmitForm() {
       <div className="mb-10">
         {step === 0 && <StepOne data={data} onChange={handleChange} />}
         {step === 1 && <StepTwo data={data} onChange={handleChange} />}
-        {step === 2 && <StepThree data={data} onChange={handleChange} liveScore={liveScore} />}
+        {step === 2 && <StepThree data={data} onChange={handleChange} />}
       </div>
 
       {error && (

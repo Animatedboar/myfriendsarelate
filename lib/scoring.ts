@@ -35,12 +35,12 @@ export const EVENT_TYPE_SCORES: Record<EventType, number> = {
 }
 
 export const IMPORTANCE_SCORES: Record<OffenderRole, number> = {
-  guest: 33,
-  driver: 67,
-  organiser: 67,
-  host: 100,
-  essential: 100,
-  guest_of_honour: 100,
+  guest: 25,
+  driver: 55,
+  organiser: 55,
+  host: 80,
+  essential: 80,
+  guest_of_honour: 80,
 }
 
 const EXCUSE_SCORES: Record<CouldHaveAvoided, number> = {
@@ -108,7 +108,7 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
   // 4. Excuse Score (10%)
   let excuseScore: number
   if (!data.excuse_type || data.excuse_type === 'none') {
-    excuseScore = 85 // no excuse given — worse than most excuses
+    excuseScore = 65 // no excuse given
   } else {
     excuseScore = data.could_have_avoided
       ? EXCUSE_SCORES[data.could_have_avoided]
@@ -130,7 +130,13 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
 
   // Modifiers
   if (data.no_show) finalScore *= 1.5
-  if (data.repeat_offender === 'yes_often') finalScore += 20
+  if (data.repeat_offender === 'yes_often') finalScore += 10
+
+  // Annoyance multiplier — self-reported reaction calibrates the objective score.
+  // annoyance=0 → ×0.5 (halved), annoyance=7+ → ×1.0 (unchanged)
+  const annoyance = typeof data.annoyance_level === 'number' ? data.annoyance_level : 5
+  const annoyanceMultiplier = Math.min(1.0, 0.5 + (annoyance / 10) * 0.7)
+  finalScore *= annoyanceMultiplier
 
   const isExceeded = finalScore > 120
   finalScore = Math.min(120, finalScore)

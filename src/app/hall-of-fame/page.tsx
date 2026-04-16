@@ -48,24 +48,25 @@ export default async function HallOfFamePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
-      <nav className="border-b border-gray-100">
+      <nav className="border-b-2 border-navy">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-navy font-bold text-lg hover:text-ember transition-colors">
+          <Link href="/" className="text-xs font-bold uppercase tracking-widest text-navy hover:text-ember transition-colors"
+            style={{ fontFamily: 'Syne, sans-serif' }}>
             My Friends Are Late
           </Link>
-          <Link href="/submit" className="btn-primary text-sm px-4 py-2">
-            Submit an Entry
+          <Link href="/submit" className="btn-primary py-2 px-5 text-xs">
+            Submit →
           </Link>
         </div>
       </nav>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <p className="text-xs font-bold uppercase tracking-widest text-ember mb-2">
-            Hall of Fame
-          </p>
-          <h1 className="text-3xl font-black text-navy">The 25 Worst Offenders</h1>
-          <p className="text-gray-500 mt-2">
+        <div className="mb-10 pt-2">
+          <p className="text-xs font-bold uppercase tracking-widest text-ember mb-3">Hall of Fame</p>
+          <h1 className="text-4xl font-bold text-navy" style={{ fontFamily: 'Syne, sans-serif' }}>
+            The 25 Worst Offenders
+          </h1>
+          <p className="text-gray-400 mt-2 text-sm">
             The most egregious acts of lateness ever submitted. Ranked by Tardiness Score.
           </p>
         </div>
@@ -80,13 +81,13 @@ export default async function HallOfFamePage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-0 border-2 border-navy divide-y-2 divide-navy">
             {entries.map((entry, i) => {
               const isExceeded = entry.final_score >= 120
               return (
                 <div
                   key={entry.id}
-                  className="rounded-2xl border border-gray-100 p-6 hover:border-ember/30 transition-colors"
+                  className="p-6 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="flex items-start gap-4">

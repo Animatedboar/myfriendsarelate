@@ -12,9 +12,13 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return {
-    title: `Tardiness Verdict — Entry ${params.id.slice(0, 8)}`,
-  }
+  return { title: `Tardiness Verdict` }
+}
+
+const EVENT_LABELS: Record<string, string> = {
+  casual: 'Casual hangout', dinner_home: 'Dinner at home', restaurant: 'Restaurant',
+  movie: 'Movie / Theatre', concert: 'Concert / Sports', escape_room: 'Escape room',
+  flight: 'Flight', wedding: 'Wedding', professional: 'Professional',
 }
 
 export default async function ResultPage({ params }: Props) {
@@ -29,7 +33,7 @@ export default async function ResultPage({ params }: Props) {
   const verdict = entry.verdict
   const styles = VERDICT_STYLES[verdict]
   const isExceeded = entry.final_score >= 120
-  const displayScore = isExceeded ? '120+' : entry.final_score
+  const displayScore = isExceeded ? '120+' : Math.round(entry.final_score)
 
   const scores: ScoreComponents = {
     relativeTimeScore: entry.relative_time_score,
@@ -45,82 +49,104 @@ export default async function ResultPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Nav */}
-      <nav className="border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-navy font-bold text-lg hover:text-ember transition-colors">
+      {/* Minimal nav */}
+      <nav className="border-b-2 border-navy">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="text-xs font-bold uppercase tracking-widest text-navy hover:text-ember transition-colors"
+            style={{ fontFamily: 'Syne, sans-serif' }}>
             My Friends Are Late
           </Link>
-          <Link href="/submit" className="text-sm text-gray-500 hover:text-navy transition-colors">
+          <Link href="/submit" className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-navy transition-colors">
             Submit another →
           </Link>
         </div>
       </nav>
 
       <main className="max-w-2xl mx-auto px-6 py-12">
-        {/* Hero verdict card — designed to be screenshot-worthy */}
-        <div
-          className={`rounded-3xl border-2 p-8 text-center mb-8 animate-fade-in ${styles.bg} ${styles.border}`}
-        >
-          <p className={`text-xs font-bold uppercase tracking-widest mb-4 opacity-50 ${styles.text}`}>
-            Tardiness Score
-          </p>
-          <p className={`text-8xl font-black tracking-tight leading-none mb-3 ${styles.score}`}>
-            {displayScore}
-          </p>
-          <p className={`text-3xl font-bold mb-3 ${styles.text}`}>
-            {VERDICT_LABELS[verdict]}
-          </p>
-          <p className={`text-base opacity-70 max-w-sm mx-auto ${styles.text}`}>
-            {VERDICT_DESCRIPTIONS[verdict]}
-          </p>
 
-          {/* Key facts strip */}
-          <div
-            className={`mt-6 pt-6 border-t border-current/10 flex flex-wrap justify-center gap-4 text-sm font-medium opacity-60 ${styles.text}`}
-          >
-            <span>{entry.offender_name}</span>
-            {entry.minutes_late != null && (
-              <>
-                <span>·</span>
-                <span>
-                  {entry.no_show
-                    ? 'No-show'
-                    : `${entry.minutes_late} min${entry.minutes_late !== 1 ? 's' : ''} late`}
-                </span>
-              </>
-            )}
+        {/* ─── THE VERDICT CARD ─── screenshot-worthy */}
+        <div className={`relative overflow-hidden border-2 mb-3 ${styles.border} ${styles.bg}`}>
+
+          {/* Top label bar */}
+          <div className={`px-8 pt-8 pb-0 flex items-center justify-between`}>
+            <p className={`text-xs font-bold uppercase tracking-widest opacity-40 ${styles.text}`}>
+              Tardiness Score
+            </p>
+            <p className={`text-xs font-bold uppercase tracking-widest opacity-40 ${styles.text}`}>
+              myfriendslate.com
+            </p>
+          </div>
+
+          {/* Giant score */}
+          <div className="px-8 pt-2 pb-0">
+            <p
+              className={`font-bold leading-none ${styles.score}`}
+              style={{
+                fontFamily: 'Syne, sans-serif',
+                fontSize: 'clamp(100px, 25vw, 180px)',
+                letterSpacing: '-0.04em',
+              }}
+            >
+              {displayScore}
+            </p>
+          </div>
+
+          {/* Verdict name */}
+          <div className={`px-8 pb-6 border-t ${styles.border} mt-4 pt-5`}>
+            <p
+              className={`text-3xl sm:text-4xl font-bold ${styles.text}`}
+              style={{ fontFamily: 'Syne, sans-serif' }}
+            >
+              {VERDICT_LABELS[verdict]}
+            </p>
+            <p className={`text-sm mt-2 opacity-60 max-w-sm ${styles.text}`}>
+              {VERDICT_DESCRIPTIONS[verdict]}
+            </p>
+          </div>
+
+          {/* Case details strip */}
+          <div className={`px-8 py-4 border-t ${styles.border} flex flex-wrap gap-x-6 gap-y-1`}>
+            <span className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
+              {entry.offender_name}
+            </span>
             {entry.event_description && (
-              <>
-                <span>·</span>
-                <span>{entry.event_description}</span>
-              </>
+              <span className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
+                {entry.event_description}
+              </span>
             )}
+            <span className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
+              {entry.no_show ? 'No-show' : `${entry.minutes_late ?? 0} min${entry.minutes_late !== 1 ? 's' : ''} late`}
+            </span>
+            <span className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
+              {EVENT_LABELS[entry.event_type] ?? entry.event_type}
+            </span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-10 animate-slide-up">
+        <div className="flex flex-col sm:flex-row gap-2 mb-10">
           <ShareButton id={params.id} />
-          <Link href="/submit" className="btn-secondary flex-1 text-center">
+          <Link href="/submit" className="btn-secondary flex-1 text-center py-3">
             Submit Another
           </Link>
-          <Link href="/dashboard" className="btn-secondary flex-1 text-center">
-            See the Dashboard →
+          <Link href="/dashboard" className="btn-secondary flex-1 text-center py-3">
+            Dashboard →
           </Link>
         </div>
 
         {/* Score breakdown */}
-        <div className="rounded-2xl border border-gray-100 p-6 animate-slide-up">
-          <h2 className="text-lg font-bold text-navy mb-6">How the score was calculated</h2>
+        <div className="border-2 border-navy p-6 mb-6">
+          <h2 className="text-base font-bold text-navy mb-6 uppercase tracking-widest text-xs"
+            style={{ fontFamily: 'Syne, sans-serif' }}>
+            How the score was calculated
+          </h2>
           <ScoreBreakdown scores={scores} />
         </div>
 
-        {/* Compare prompt */}
-        <div className="mt-8 text-center text-sm text-gray-400">
-          See how {entry.offender_name} compares to everyone else →{' '}
-          <Link href="/dashboard" className="text-ember hover:underline font-medium">
-            View the dashboard
+        <div className="text-center text-xs text-gray-400 uppercase tracking-widest">
+          See how {entry.offender_name} compares to everyone else —{' '}
+          <Link href="/dashboard" className="text-ember hover:underline font-bold">
+            View dashboard
           </Link>
         </div>
       </main>
