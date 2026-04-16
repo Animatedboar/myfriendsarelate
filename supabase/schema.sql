@@ -6,7 +6,7 @@ CREATE TABLE entries (
 
   -- About the offender
   offender_name TEXT NOT NULL,
-  relationship TEXT NOT NULL,
+  relationship TEXT,
   offender_role TEXT NOT NULL,
 
   -- About the event
@@ -35,9 +35,9 @@ CREATE TABLE entries (
 
   -- Your reaction
   annoyance_level INTEGER NOT NULL,
-  event_impact TEXT NOT NULL,
+  event_impact TEXT,
   forgiven TEXT NOT NULL,
-  will_do_again TEXT NOT NULL,
+  will_do_again TEXT,
   extra_context TEXT,
 
   -- Calculated scores (stored for dashboard efficiency)
