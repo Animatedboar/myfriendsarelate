@@ -3,6 +3,16 @@ import Link from 'next/link'
 import { supabase } from '../../../lib/supabase'
 import { VERDICT_LABELS } from '../../../lib/scoring'
 import VerdictBadge from '../../components/VerdictBadge'
+import type { VerdictKey } from '../../../lib/types'
+
+const VERDICT_ACCENT_BG: Record<VerdictKey, string> = {
+  saint: 'bg-emerald-400',
+  fashionably_late: 'bg-amber-400',
+  chronic_offender: 'bg-orange-500',
+  disrespecter: 'bg-red-500',
+  repeat_criminal: 'bg-red-700',
+  time_terrorist: 'bg-red-900',
+}
 
 export const metadata: Metadata = {
   title: 'Hall of Fame',
@@ -84,14 +94,25 @@ export default async function HallOfFamePage() {
           <div className="space-y-0 border-2 border-navy divide-y-2 divide-navy">
             {entries.map((entry, i) => {
               const isExceeded = entry.final_score >= 120
+              const accentBg = VERDICT_ACCENT_BG[entry.verdict as VerdictKey] ?? 'bg-gray-300'
+              const rankColors = i === 0
+                ? 'text-amber-500'
+                : i === 1
+                ? 'text-gray-400'
+                : i === 2
+                ? 'text-orange-700'
+                : 'text-gray-200'
               return (
                 <div
                   key={entry.id}
-                  className="p-6 hover:bg-gray-50 transition-colors"
+                  className="relative pl-8 pr-6 py-6 hover:bg-gray-50 transition-colors"
                 >
+                  {/* Verdict accent bar */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${accentBg}`} />
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="flex items-start gap-4">
-                      <span className="text-2xl font-black text-gray-200 w-8 shrink-0 mt-0.5">
+                      <span className={`text-2xl font-black w-8 shrink-0 mt-0.5 ${rankColors}`}
+                        style={{ fontFamily: 'Syne, sans-serif' }}>
                         {i + 1}
                       </span>
                       <div>

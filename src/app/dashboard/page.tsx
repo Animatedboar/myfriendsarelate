@@ -27,9 +27,9 @@ async function getStats(): Promise<StatsResponse | null> {
   }
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+function StatCard({ label, value, sub, accent }: { label: string; value: string | number; sub?: string; accent?: string }) {
   return (
-    <div className="border-2 border-navy p-6">
+    <div className={`border-2 border-navy p-6 relative overflow-hidden ${accent ? `border-l-4 ${accent}` : ''}`}>
       <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{label}</p>
       <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Syne, sans-serif' }}>{value}</p>
       {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
@@ -84,8 +84,8 @@ export default async function DashboardPage() {
           <div className="space-y-8">
             {/* Top stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <StatCard label="Total Entries" value={stats.totalEntries} />
-              <StatCard label="Average Score" value={stats.averageScore} sub="out of 120" />
+              <StatCard label="Total Entries" value={stats.totalEntries} accent="border-l-navy" />
+              <StatCard label="Average Score" value={stats.averageScore} sub="out of 120" accent="border-l-ember" />
               <StatCard
                 label="Most Common Verdict"
                 value={
@@ -95,15 +95,15 @@ export default async function DashboardPage() {
                         .replace(/\b\w/g, (c) => c.toUpperCase())
                     : '—'
                 }
+                accent="border-l-orange-400"
               />
               <StatCard
-                label="No-shows"
-                value={`${Math.round(
-                  ((stats.topOffenders.filter((e) => e.no_show).length /
-                    Math.max(stats.totalEntries, 1)) *
-                    100)
-                )}%`}
-                sub="of all entries"
+                label="Time Terrorists"
+                value={
+                  stats.verdictDistribution.find(v => v.verdict === 'time_terrorist')?.count ?? 0
+                }
+                sub="scored 90+"
+                accent="border-l-red-600"
               />
             </div>
 

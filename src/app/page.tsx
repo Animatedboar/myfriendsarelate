@@ -19,13 +19,27 @@ async function getQuickStats() {
   }
 }
 
-const VERDICT_TIERS: [VerdictKey, string, string, string][] = [
-  ['saint',           '0–15',   'bg-emerald-50  border-emerald-200 text-emerald-800', 'text-emerald-400'],
-  ['fashionably_late','16–30',  'bg-amber-50    border-amber-200   text-amber-800',   'text-amber-400'],
-  ['chronic_offender','31–50',  'bg-orange-50   border-orange-200  text-orange-800',  'text-orange-400'],
-  ['disrespecter',    '51–70',  'bg-red-50      border-red-200     text-red-800',     'text-red-400'],
-  ['repeat_criminal', '71–89',  'bg-red-100     border-red-300     text-red-900',     'text-red-500'],
-  ['time_terrorist',  '90–120+','bg-gray-950    border-gray-800    text-red-400',     'text-red-700'],
+const VERDICT_TIERS: [VerdictKey, string, string, string, string][] = [
+  ['saint',           '0–15',   'bg-emerald-500 text-white',       'text-white/30', '✦ Basically fine.'],
+  ['fashionably_late','16–30',  'bg-amber-400   text-white',       'text-white/30', '✦ Annoying but forgivable.'],
+  ['chronic_offender','31–50',  'bg-orange-500  text-white',       'text-white/30', '✦ A documented pattern.'],
+  ['disrespecter',    '51–70',  'bg-red-500     text-white',       'text-white/30', '✦ Context makes it worse.'],
+  ['repeat_criminal', '71–89',  'bg-red-700     text-white',       'text-white/30', '✦ Consider having words.'],
+  ['time_terrorist',  '90–120+','bg-gray-950    text-red-400',     'text-red-900',  '✦ Forgiveness is optional.'],
+]
+
+const TICKER_ITEMS = [
+  '94 · The Time Terrorist',
+  '78 · The Repeat Criminal',
+  '62 · The Disrespecter',
+  '43 · The Chronic Offender',
+  '22 · The Fashionably Late',
+  '8 · The Saint',
+  'No notice given',
+  'No excuse offered',
+  'The host was the one who was late',
+  'Missed the flight',
+  'No-show to their own surprise party',
 ]
 
 export default async function HomePage() {
@@ -95,6 +109,18 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Marquee ticker */}
+      <div className="border-b-2 border-navy bg-navy overflow-hidden py-3 select-none">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+            <span key={i} className="inline-flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-white/40 px-8">
+              {item}
+              <span className="text-ember opacity-60">·</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Stats strip */}
       {stats.total > 0 && (
         <section className="border-b-2 border-navy bg-ember">
@@ -136,20 +162,24 @@ export default async function HomePage() {
                 n: '01',
                 title: 'Tell us what happened',
                 body: 'Three short steps. The offender, the event, the excuse. Takes about two minutes.',
+                accent: 'bg-navy',
               },
               {
                 n: '02',
                 title: 'Get your Tardiness Score',
-                body: 'Five factors — relative lateness, event severity, their role, the excuse, the notice given — weighted and combined.',
+                body: 'Five factors — relative lateness, event severity, their role, the excuse, and the notice given. Weighted and combined into one number.',
+                accent: 'bg-ember',
               },
               {
                 n: '03',
                 title: 'Share the verdict',
                 body: 'Screenshot it. Send it to the group chat. Let the data speak for itself.',
+                accent: 'bg-navy',
               },
             ].map((item, i) => (
-              <div key={item.n} className={`p-8 ${i < 2 ? 'border-b-2 sm:border-b-0 sm:border-r-2 border-navy' : ''}`}>
-                <div className="text-5xl font-bold text-navy/10 mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>{item.n}</div>
+              <div key={item.n} className={`relative overflow-hidden p-8 ${i < 2 ? 'border-b-2 sm:border-b-0 sm:border-r-2 border-navy' : ''}`}>
+                <div className={`absolute top-0 left-0 h-1 w-full ${item.accent}`} />
+                <div className="text-6xl font-black text-navy/8 mb-6 leading-none" style={{ fontFamily: 'Syne, sans-serif' }}>{item.n}</div>
                 <h3 className="text-lg font-bold text-navy mb-3" style={{ fontFamily: 'Syne, sans-serif' }}>{item.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{item.body}</p>
               </div>
@@ -167,15 +197,17 @@ export default async function HomePage() {
             <p className="text-sm text-gray-400 font-medium hidden sm:block">From petty infraction to unforgivable act.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-navy border-2 border-navy">
-            {VERDICT_TIERS.map(([verdict, range, cls, rangeCls]) => (
-              <div key={verdict} className={`p-6 flex items-start justify-between gap-4 ${cls}`}>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-50 mb-2">{range}</p>
-                  <p className="font-bold text-base" style={{ fontFamily: 'Syne, sans-serif' }}>{VERDICT_LABELS[verdict]}</p>
-                </div>
-                <span className={`text-3xl font-bold opacity-30 ${rangeCls}`} style={{ fontFamily: 'Syne, sans-serif' }}>
+            {VERDICT_TIERS.map(([verdict, range, cls, numCls, note]) => (
+              <div key={verdict} className={`p-6 relative overflow-hidden ${cls}`}>
+                <span className={`absolute right-4 top-1/2 -translate-y-1/2 text-8xl font-black leading-none pointer-events-none select-none ${numCls}`}
+                  style={{ fontFamily: 'Syne, sans-serif' }}>
                   {range.split('–')[0]}
                 </span>
+                <div className="relative z-10">
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-1.5">{range}</p>
+                  <p className="font-bold text-lg mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>{VERDICT_LABELS[verdict]}</p>
+                  <p className="text-xs opacity-60 font-medium">{note}</p>
+                </div>
               </div>
             ))}
           </div>
