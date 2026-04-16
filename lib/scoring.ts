@@ -5,8 +5,7 @@ import type {
   EventDuration,
   EventType,
   OffenderRole,
-  NoticeTiming,
-  NoticeMethod,
+  NoticeType,
   CouldHaveAvoided,
 } from './types'
 
@@ -52,18 +51,14 @@ const EXCUSE_SCORES: Record<CouldHaveAvoided, number> = {
   definitely_yes: 100,
 }
 
-const NOTICE_TIMING_SCORES: Record<NoticeTiming, number> = {
-  over_1hr: 0,
-  '30_60min': 10,
-  '10_30min': 25,
-  under_10min: 40,
-  after_agreed: 50,
-}
-
-const NOTICE_METHOD_SCORES: Record<NoticeMethod, number> = {
-  phone_call: 0,
-  text: 20,
-  none: 50,
+// Combined notice question maps directly to a notice score (0–100)
+export const NOTICE_TYPE_SCORES: Record<NoticeType, number> = {
+  called_early:   10,  // called 30+ min before — best possible
+  called_late:    25,  // called <30 min before
+  texted_early:   30,  // texted 30+ min before
+  texted_late:    45,  // texted <30 min before
+  after_arriving: 70,  // told them after arriving late
+  no_contact:    100,  // nothing — worst possible
 }
 
 // ---------------------------------------------------------------------------
@@ -112,7 +107,7 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
 
   // 4. Excuse Score (10%)
   let excuseScore: number
-  if (!data.gave_excuse) {
+  if (!data.excuse_type || data.excuse_type === 'none') {
     excuseScore = 85 // no excuse given — worse than most excuses
   } else {
     excuseScore = data.could_have_avoided
@@ -120,19 +115,10 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
       : 50
   }
 
-  // 5. Notice Quality Score (10%) — timing (0–50) + method (0–50) = 0–100
-  let noticeScore: number
-  if (!data.gave_notice) {
-    noticeScore = 100 // worst possible — no notice at all
-  } else {
-    const timingScore = data.notice_timing
-      ? NOTICE_TIMING_SCORES[data.notice_timing]
-      : 50
-    const methodScore = data.notice_method
-      ? NOTICE_METHOD_SCORES[data.notice_method]
-      : 50
-    noticeScore = timingScore + methodScore
-  }
+  // 5. Notice Quality Score (10%)
+  const noticeScore = data.notice_type
+    ? NOTICE_TYPE_SCORES[data.notice_type]
+    : 100 // no answer = assume no contact
 
   // Final weighted formula
   let finalScore =

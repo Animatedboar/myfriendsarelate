@@ -4,60 +4,57 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FormData } from '../../../lib/types'
 import { calculateScore } from '../../../lib/scoring'
-import StepOffender from './StepOffender'
-import StepEvent from './StepEvent'
-import StepLateness from './StepLateness'
-import StepExcuse from './StepExcuse'
-import StepReaction from './StepReaction'
+import StepOne from './StepOne'
+import StepTwo from './StepTwo'
+import StepThree from './StepThree'
 
 const INITIAL_DATA: FormData = {
   offender_name: '',
-  relationship: '',
   offender_role: '',
   event_description: '',
   event_type: '',
-  agreed_time: '',
   event_duration: '',
-  people_waiting: 1,
+  agreed_time: '',
   actual_arrival: '',
   no_show: false,
-  gave_notice: false,
-  notice_timing: '',
-  notice_method: '',
+  notice_type: '',
   repeat_offender: '',
-  gave_excuse: false,
-  excuse_text: '',
-  excuse_category: '',
-  excuse_convincing: 5,
+  excuse_type: '',
   could_have_avoided: '',
   apologised: '',
   annoyance_level: 5,
-  event_impact: '',
   forgiven: '',
-  will_do_again: '',
   extra_context: '',
 }
 
 const STEPS = [
-  { title: 'About the Offender', subtitle: 'Who we are judging today.' },
-  { title: 'About the Event', subtitle: 'Context is everything.' },
-  { title: 'About the Lateness', subtitle: "The facts, as you experienced them." },
-  { title: 'About the Excuse', subtitle: 'Their defence, if any.' },
-  { title: 'Your Reaction', subtitle: 'The human cost.' },
+  {
+    title: 'The Offender & Event',
+    subtitle: 'Set the scene.',
+  },
+  {
+    title: 'What Happened',
+    subtitle: 'The facts, as you experienced them.',
+  },
+  {
+    title: 'The Excuse & Your Take',
+    subtitle: 'Their defence. Your reaction.',
+  },
 ]
 
 function isStepValid(step: number, data: FormData): boolean {
   switch (step) {
     case 0:
-      return !!data.offender_name.trim() && !!data.relationship && !!data.offender_role
+      return !!data.offender_name.trim() && !!data.offender_role && !!data.event_type && !!data.event_duration
     case 1:
-      return !!data.event_type && !!data.agreed_time && !!data.event_duration
+      return !!data.agreed_time && (data.no_show || !!data.actual_arrival) && !!data.notice_type && !!data.repeat_offender
     case 2:
-      return (data.no_show || !!data.actual_arrival) && !!data.repeat_offender
-    case 3:
-      return !!data.apologised
-    case 4:
-      return !!data.event_impact && !!data.forgiven && !!data.will_do_again
+      return (
+        !!data.excuse_type &&
+        (data.excuse_type === 'none' || !!data.could_have_avoided) &&
+        !!data.apologised &&
+        !!data.forgiven
+      )
     default:
       return false
   }
@@ -75,14 +72,8 @@ export default function SubmitForm() {
   }
 
   const liveScore = calculateScore(data)
-
-  const handleNext = () => {
-    if (step < STEPS.length - 1) setStep((s) => s + 1)
-  }
-
-  const handleBack = () => {
-    if (step > 0) setStep((s) => s - 1)
-  }
+  const valid = isStepValid(step, data)
+  const isLast = step === STEPS.length - 1
 
   const handleSubmit = async () => {
     setSubmitting(true)
@@ -105,19 +96,17 @@ export default function SubmitForm() {
     }
   }
 
-  const currentStep = STEPS[step]
-  const valid = isStepValid(step, data)
-  const isLast = step === STEPS.length - 1
+  const current = STEPS[step]
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Progress bar */}
+      {/* Progress */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          {STEPS.map((s, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center">
+        <div className="flex items-center gap-2 mb-3">
+          {STEPS.map((_, i) => (
+            <div key={i} className="flex items-center gap-2 flex-1">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200 ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all duration-200 ${
                   i < step
                     ? 'bg-ember text-white'
                     : i === step
@@ -127,14 +116,16 @@ export default function SubmitForm() {
               >
                 {i < step ? '✓' : i + 1}
               </div>
+              {i < STEPS.length - 1 && (
+                <div className="flex-1 h-0.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div
+                    className="h-full bg-ember transition-all duration-300"
+                    style={{ width: i < step ? '100%' : '0%' }}
+                  />
+                </div>
+              )}
             </div>
           ))}
-        </div>
-        <div className="relative h-1.5 bg-gray-100 rounded-full mt-2">
-          <div
-            className="absolute top-0 left-0 h-full bg-ember rounded-full transition-all duration-300"
-            style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
-          />
         </div>
       </div>
 
@@ -143,22 +134,17 @@ export default function SubmitForm() {
         <p className="text-xs font-semibold uppercase tracking-widest text-ember mb-1">
           Step {step + 1} of {STEPS.length}
         </p>
-        <h2 className="text-2xl font-bold text-navy">{currentStep.title}</h2>
-        <p className="text-gray-500 mt-1">{currentStep.subtitle}</p>
+        <h2 className="text-2xl font-bold text-navy">{current.title}</h2>
+        <p className="text-gray-500 mt-1">{current.subtitle}</p>
       </div>
 
       {/* Step content */}
       <div className="mb-10">
-        {step === 0 && <StepOffender data={data} onChange={handleChange} />}
-        {step === 1 && <StepEvent data={data} onChange={handleChange} />}
-        {step === 2 && <StepLateness data={data} onChange={handleChange} />}
-        {step === 3 && <StepExcuse data={data} onChange={handleChange} />}
-        {step === 4 && (
-          <StepReaction data={data} onChange={handleChange} liveScore={liveScore} />
-        )}
+        {step === 0 && <StepOne data={data} onChange={handleChange} />}
+        {step === 1 && <StepTwo data={data} onChange={handleChange} />}
+        {step === 2 && <StepThree data={data} onChange={handleChange} liveScore={liveScore} />}
       </div>
 
-      {/* Error */}
       {error && (
         <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
           {error}
@@ -169,7 +155,7 @@ export default function SubmitForm() {
       <div className="flex items-center justify-between">
         <button
           type="button"
-          onClick={handleBack}
+          onClick={() => setStep((s) => s - 1)}
           disabled={step === 0}
           className="btn-ghost disabled:opacity-0 disabled:pointer-events-none"
         >
@@ -188,7 +174,7 @@ export default function SubmitForm() {
         ) : (
           <button
             type="button"
-            onClick={handleNext}
+            onClick={() => setStep((s) => s + 1)}
             disabled={!valid}
             className="btn-primary"
           >

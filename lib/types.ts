@@ -1,12 +1,3 @@
-export type Relationship =
-  | 'stranger'
-  | 'acquaintance'
-  | 'friend'
-  | 'close_friend'
-  | 'best_friend'
-  | 'partner'
-  | 'family'
-
 export type OffenderRole =
   | 'guest'
   | 'host'
@@ -34,6 +25,26 @@ export type EventDuration =
   | 'half_day'
   | 'full_day'
 
+// Combined notice question: method + rough timing in one
+export type NoticeType =
+  | 'no_contact'      // noticeScore = 100
+  | 'called_early'    // called 30+ min before → noticeScore = 10
+  | 'called_late'     // called <30 min before → noticeScore = 25
+  | 'texted_early'    // texted 30+ min before → noticeScore = 30
+  | 'texted_late'     // texted <30 min before → noticeScore = 45
+  | 'after_arriving'  // told them after arriving → noticeScore = 70
+
+// 'none' = no excuse given (scores 85), otherwise the category
+export type ExcuseType =
+  | 'none'
+  | 'emergency'
+  | 'traffic'
+  | 'work'
+  | 'forgot'
+  | 'overslept'
+  | 'other'
+
+// Keep these for DB compatibility
 export type NoticeTiming =
   | 'over_1hr'
   | '30_60min'
@@ -42,20 +53,13 @@ export type NoticeTiming =
   | 'after_agreed'
 
 export type NoticeMethod = 'phone_call' | 'text' | 'none'
+export type ExcuseCategory = 'emergency' | 'traffic' | 'work' | 'forgot' | 'overslept' | 'other'
 
 export type RepeatOffender =
   | 'yes_often'
   | 'yes_occasionally'
   | 'first_time'
   | 'not_sure'
-
-export type ExcuseCategory =
-  | 'emergency'
-  | 'traffic'
-  | 'work'
-  | 'forgot'
-  | 'overslept'
-  | 'other'
 
 export type CouldHaveAvoided =
   | 'definitely_not'
@@ -66,15 +70,11 @@ export type CouldHaveAvoided =
 
 export type Apologised = 'yes_sincerely' | 'yes_hollow' | 'no'
 
-export type EventImpact = 'not_at_all' | 'slightly' | 'significantly' | 'ruined_it'
-
 export type Forgiven =
   | 'yes_completely'
   | 'mostly'
   | 'holding_grudge'
   | 'unresolved'
-
-export type WillDoAgain = 'no' | 'probably_not' | 'probably' | 'definitely'
 
 export type VerdictKey =
   | 'saint'
@@ -85,39 +85,26 @@ export type VerdictKey =
   | 'time_terrorist'
 
 export interface FormData {
-  // Section 1: About the Offender
+  // Step 1: The Offender & Event
   offender_name: string
-  relationship: Relationship | ''
   offender_role: OffenderRole | ''
-
-  // Section 2: About the Event
   event_description: string
   event_type: EventType | ''
-  agreed_time: string
   event_duration: EventDuration | ''
-  people_waiting: number
 
-  // Section 3: About the Lateness
+  // Step 2: What Happened
+  agreed_time: string
   actual_arrival: string
   no_show: boolean
-  gave_notice: boolean
-  notice_timing: NoticeTiming | ''
-  notice_method: NoticeMethod | ''
+  notice_type: NoticeType | ''
   repeat_offender: RepeatOffender | ''
 
-  // Section 4: About the Excuse
-  gave_excuse: boolean
-  excuse_text: string
-  excuse_category: ExcuseCategory | ''
-  excuse_convincing: number
+  // Step 3: The Excuse & Reaction
+  excuse_type: ExcuseType | ''
   could_have_avoided: CouldHaveAvoided | ''
   apologised: Apologised | ''
-
-  // Section 5: Your Reaction
   annoyance_level: number
-  event_impact: EventImpact | ''
   forgiven: Forgiven | ''
-  will_do_again: WillDoAgain | ''
   extra_context: string
 }
 
@@ -130,14 +117,14 @@ export interface ScoreComponents {
   finalScore: number
   verdict: VerdictKey
   minutesLate: number
-  isExceeded: boolean // score hit 120 cap
+  isExceeded: boolean
 }
 
 export interface Entry {
   id: string
   created_at: string
   offender_name: string
-  relationship: Relationship
+  relationship: string | null
   offender_role: OffenderRole
   event_description: string | null
   event_type: EventType
@@ -158,9 +145,9 @@ export interface Entry {
   could_have_avoided: CouldHaveAvoided | null
   apologised: Apologised | null
   annoyance_level: number
-  event_impact: EventImpact
+  event_impact: string | null
   forgiven: Forgiven
-  will_do_again: WillDoAgain
+  will_do_again: string | null
   extra_context: string | null
   relative_time_score: number
   event_type_score: number
