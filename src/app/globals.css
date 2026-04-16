@@ -2,26 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-white text-gray-900 antialiased;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-ember text-white font-semibold rounded-lg hover:bg-ember-600 active:bg-ember-700 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-white text-navy border border-navy/20 font-semibold rounded-lg hover:bg-navy-50 active:bg-navy-100 transition-colors duration-150;
+  }
+
+  .form-label {
+    @apply block text-sm font-semibold text-gray-700 mb-1;
+  }
+
+  .form-hint {
+    @apply text-xs text-gray-400 mt-1 leading-relaxed;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-ember/30 focus:border-ember transition-colors;
+  }
+
+  .form-select {
+    @apply w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-ember/30 focus:border-ember transition-colors cursor-pointer;
+  }
+
+  .option-btn {
+    @apply px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:border-ember/50 hover:text-ember transition-all duration-100 cursor-pointer text-left;
+  }
+
+  .option-btn.selected {
+    @apply border-ember bg-ember/5 text-ember;
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: #e5e7eb;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #E8543A;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }

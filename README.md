@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# My Friends Are Late
 
-## Getting Started
+A website where you submit instances of friends being late and receive a **Tardiness Score** — a data-driven verdict on exactly how bad it was.
 
-First, run the development server:
+Companion to the [My Friends Are Late YouTube channel](https://youtube.com).
+
+---
+
+## What it does
+
+- **Submit an entry** — answer 22 questions about the offender, the event, the lateness, and the excuse
+- **Receive a Tardiness Score** (0–120+) and a named verdict: *The Saint*, *The Fashionably Late*, *The Chronic Offender*, *The Disrespecter*, *The Repeat Criminal*, or *The Time Terrorist*
+- **Share your verdict** — designed to be screenshot-worthy and sent to the late friend
+- **Live dashboard** — aggregate stats, charts, and patterns across all submissions
+- **Hall of Fame** — the 25 most egregious offenders ever submitted
+
+---
+
+## Tech stack
+
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **Supabase** (Postgres)
+- **Recharts**
+- **Vercel** (deployment)
+
+---
+
+## Getting started
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up Supabase
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run the SQL in `supabase/schema.sql` in the Supabase SQL editor
+3. Copy your project URL and anon key
+
+### 3. Configure environment variables
+
+```bash
+cp .env.local.example .env.local
+```
+
+Fill in your Supabase credentials in `.env.local`.
+
+### 4. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scoring formula
 
-## Learn More
+The Tardiness Score is calculated from five weighted factors:
 
-To learn more about Next.js, take a look at the following resources:
+| Factor | Weight | What it measures |
+|--------|--------|-----------------|
+| Relative Lateness | 40% | How late vs. how long the event was |
+| Event Severity | 20% | A wedding vs. a casual hangout |
+| Their Role | 20% | Could the event not start without them? |
+| Excuse Quality | 10% | Could they have avoided it? |
+| Notice Given | 10% | How early, and by what method |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Modifiers:** No-shows multiply the score by 1.5. Chronic repeat offenders add 20 points. Score caps at 120.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy to Vercel with one click. Set the same environment variables in Vercel's project settings.
