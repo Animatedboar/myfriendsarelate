@@ -45,13 +45,15 @@ export default async function ResultPage({ params }: Props) {
     verdict: entry.verdict,
     minutesLate: entry.minutes_late ?? 0,
     isExceeded,
+    modifiers: [], // modifiers computed at submission; not re-derived from stored scores
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Minimal nav */}
+    <div className="min-h-screen bg-white flex flex-col">
+
+      {/* Nav */}
       <nav className="border-b-2 border-navy">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="text-xs font-bold uppercase tracking-widest text-navy hover:text-ember transition-colors"
             style={{ fontFamily: 'Syne, sans-serif' }}>
             My Friends Are Late
@@ -62,18 +64,30 @@ export default async function ResultPage({ params }: Props) {
         </div>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-6 py-12">
+      {/* Verdict colour band */}
+      <div className={`border-b-2 ${styles.border} ${styles.bg} py-3 px-6`}>
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <p className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
+            Verdict issued
+          </p>
+          <p className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
+            myfriendslate.com
+          </p>
+        </div>
+      </div>
+
+      <main className="max-w-3xl mx-auto px-6 py-10 flex-1 w-full">
 
         {/* ─── THE VERDICT CARD ─── screenshot-worthy */}
-        <div className={`relative overflow-hidden border-2 mb-3 ${styles.border} ${styles.bg}`}>
+        <div className={`relative overflow-hidden border-2 mb-4 ${styles.border} ${styles.bg}`}>
 
           {/* Top label bar */}
-          <div className={`px-8 pt-8 pb-0 flex items-center justify-between`}>
+          <div className="px-8 pt-8 pb-0 flex items-center justify-between">
             <p className={`text-xs font-bold uppercase tracking-widest opacity-40 ${styles.text}`}>
               Tardiness Score
             </p>
             <p className={`text-xs font-bold uppercase tracking-widest opacity-40 ${styles.text}`}>
-              myfriendslate.com
+              {entry.offender_name}
             </p>
           </div>
 
@@ -83,7 +97,7 @@ export default async function ResultPage({ params }: Props) {
               className={`font-bold leading-none ${styles.score}`}
               style={{
                 fontFamily: 'Syne, sans-serif',
-                fontSize: 'clamp(100px, 25vw, 180px)',
+                fontSize: 'clamp(80px, 22vw, 160px)',
                 letterSpacing: '-0.04em',
               }}
             >
@@ -92,7 +106,7 @@ export default async function ResultPage({ params }: Props) {
           </div>
 
           {/* Verdict name */}
-          <div className={`px-8 pb-6 border-t ${styles.border} mt-4 pt-5`}>
+          <div className={`px-8 pb-6 border-t-2 ${styles.border} mt-4 pt-5`}>
             <p
               className={`text-3xl sm:text-4xl font-bold ${styles.text}`}
               style={{ fontFamily: 'Syne, sans-serif' }}
@@ -105,10 +119,7 @@ export default async function ResultPage({ params }: Props) {
           </div>
 
           {/* Case details strip */}
-          <div className={`px-8 py-4 border-t ${styles.border} flex flex-wrap gap-x-6 gap-y-1`}>
-            <span className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
-              {entry.offender_name}
-            </span>
+          <div className={`px-8 py-4 border-t-2 ${styles.border} flex flex-wrap gap-x-6 gap-y-1`}>
             {entry.event_description && (
               <span className={`text-xs font-bold uppercase tracking-widest opacity-50 ${styles.text}`}>
                 {entry.event_description}
@@ -135,12 +146,15 @@ export default async function ResultPage({ params }: Props) {
         </div>
 
         {/* Score breakdown */}
-        <div className="border-2 border-navy p-6 mb-6">
-          <h2 className="text-base font-bold text-navy mb-6 uppercase tracking-widest text-xs"
-            style={{ fontFamily: 'Syne, sans-serif' }}>
-            How the score was calculated
-          </h2>
-          <ScoreBreakdown scores={scores} />
+        <div className="border-2 border-navy overflow-hidden mb-8">
+          <div className="px-6 py-3 border-b-2 border-navy bg-navy">
+            <p className="text-xs font-bold uppercase tracking-widest text-white/60">
+              How the score was calculated
+            </p>
+          </div>
+          <div className="p-6">
+            <ScoreBreakdown scores={scores} />
+          </div>
         </div>
 
         <div className="text-center text-xs text-gray-400 uppercase tracking-widest">
@@ -150,6 +164,18 @@ export default async function ResultPage({ params }: Props) {
           </Link>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t-2 border-navy mt-12 py-6">
+        <div className="max-w-3xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400 uppercase tracking-widest font-medium">
+          <span>My Friends Are Late</span>
+          <div className="flex gap-8">
+            <Link href="/dashboard" className="hover:text-navy transition-colors">Dashboard</Link>
+            <Link href="/hall-of-fame" className="hover:text-navy transition-colors">Hall of Fame</Link>
+            <Link href="/submit" className="hover:text-navy transition-colors">Submit</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

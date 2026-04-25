@@ -9,10 +9,12 @@ import StepThree from './StepThree'
 
 const INITIAL_DATA: FormData = {
   offender_name: '',
+  relationship: '',
   offender_role: '',
   event_description: '',
   event_type: '',
   event_duration: '',
+  people_waiting: 1,
   agreed_time: '',
   actual_arrival: '',
   no_show: false,
@@ -22,36 +24,41 @@ const INITIAL_DATA: FormData = {
   could_have_avoided: '',
   apologised: '',
   annoyance_level: 5,
+  event_impact: '',
   forgiven: '',
   extra_context: '',
 }
 
 const STEPS = [
-  {
-    title: 'The Offender & Event',
-    subtitle: 'Set the scene.',
-  },
-  {
-    title: 'What Happened',
-    subtitle: 'The facts, as you experienced them.',
-  },
-  {
-    title: 'The Excuse & Your Take',
-    subtitle: 'Their defence. Your reaction.',
-  },
+  { title: 'The Offender & Event',   subtitle: 'Set the scene.' },
+  { title: 'What Happened',          subtitle: 'The facts, as you experienced them.' },
+  { title: 'The Excuse & Your Take', subtitle: 'Their defence. Your reaction.' },
 ]
 
 function isStepValid(step: number, data: FormData): boolean {
   switch (step) {
     case 0:
-      return !!data.offender_name.trim() && !!data.offender_role && !!data.event_type && !!data.event_duration
+      return (
+        !!data.offender_name.trim() &&
+        !!data.relationship &&
+        !!data.offender_role &&
+        !!data.event_type &&
+        !!data.event_duration &&
+        !!data.people_waiting
+      )
     case 1:
-      return !!data.agreed_time && (data.no_show || !!data.actual_arrival) && !!data.notice_type && !!data.repeat_offender
+      return (
+        !!data.agreed_time &&
+        (data.no_show || !!data.actual_arrival) &&
+        !!data.notice_type &&
+        !!data.repeat_offender
+      )
     case 2:
       return (
         !!data.excuse_type &&
         (data.excuse_type === 'none' || !!data.could_have_avoided) &&
         !!data.apologised &&
+        !!data.event_impact &&
         !!data.forgiven
       )
     default:
@@ -98,24 +105,32 @@ export default function SubmitForm() {
 
   return (
     <div className="max-w-2xl mx-auto">
+
       {/* Progress */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-3">
-          {STEPS.map((_, i) => (
-            <div key={i} className="flex items-center gap-2 flex-1">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all duration-200 ${
-                  i < step
-                    ? 'bg-ember text-white'
-                    : i === step
-                    ? 'bg-navy text-white ring-4 ring-navy/20'
-                    : 'bg-gray-100 text-gray-400'
-                }`}
-              >
-                {i < step ? '✓' : i + 1}
+      <div className="mb-10">
+        <div className="flex items-center gap-0">
+          {STEPS.map((s, i) => (
+            <div key={i} className="flex items-center flex-1">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-7 h-7 flex items-center justify-center text-xs font-bold shrink-0 border-2 transition-all duration-200 ${
+                    i < step
+                      ? 'bg-ember border-ember text-white'
+                      : i === step
+                      ? 'bg-navy border-navy text-white'
+                      : 'bg-white border-gray-200 text-gray-400'
+                  }`}
+                >
+                  {i < step ? '✓' : i + 1}
+                </div>
+                <span className={`text-xs font-bold uppercase tracking-widest hidden sm:block ${
+                  i === step ? 'text-navy' : 'text-gray-300'
+                }`}>
+                  {s.title}
+                </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className="flex-1 h-0.5 rounded-full bg-gray-100 overflow-hidden">
+                <div className="flex-1 h-0.5 bg-gray-100 mx-4 overflow-hidden">
                   <div
                     className="h-full bg-ember transition-all duration-300"
                     style={{ width: i < step ? '100%' : '0%' }}
@@ -128,12 +143,14 @@ export default function SubmitForm() {
       </div>
 
       {/* Step header */}
-      <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-ember mb-1">
+      <div className="mb-8 pb-6 border-b-2 border-navy">
+        <p className="text-xs font-bold uppercase tracking-widest text-ember mb-1">
           Step {step + 1} of {STEPS.length}
         </p>
-        <h2 className="text-2xl font-bold text-navy">{current.title}</h2>
-        <p className="text-gray-500 mt-1">{current.subtitle}</p>
+        <h2 className="text-2xl font-bold text-navy" style={{ fontFamily: 'Syne, sans-serif' }}>
+          {current.title}
+        </h2>
+        <p className="text-gray-400 mt-1 text-sm">{current.subtitle}</p>
       </div>
 
       {/* Step content */}
@@ -144,13 +161,13 @@ export default function SubmitForm() {
       </div>
 
       {error && (
-        <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+        <div className="mb-4 px-4 py-3 border-2 border-red-300 bg-red-50 text-red-700 text-sm">
           {error}
         </div>
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-6 border-t-2 border-gray-100">
         <button
           type="button"
           onClick={() => setStep((s) => s - 1)}

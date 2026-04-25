@@ -1,6 +1,7 @@
 import type {
   FormData,
   ScoreComponents,
+  ScoreModifier,
   VerdictKey,
   EventDuration,
   EventType,
@@ -25,22 +26,22 @@ export const EVENT_DURATION_MINUTES: Record<EventDuration, number> = {
 export const EVENT_TYPE_SCORES: Record<EventType, number> = {
   casual: 20,
   dinner_home: 40,
-  restaurant: 60,
+  restaurant: 80,   // raised: table reservations have a hard 15-min hold window
   movie: 80,
   concert: 80,
-  escape_room: 80,
+  escape_room: 100, // raised: paid, fixed time slot — the purest hard-start event
   flight: 100,
   wedding: 100,
   professional: 100,
 }
 
 export const IMPORTANCE_SCORES: Record<OffenderRole, number> = {
-  guest: 25,
-  driver: 55,
-  organiser: 55,
-  host: 80,
-  essential: 80,
-  guest_of_honour: 80,
+  guest: 33,
+  driver: 67,
+  organiser: 67,
+  host: 100,
+  essential: 100,
+  guest_of_honour: 100,
 }
 
 const EXCUSE_SCORES: Record<CouldHaveAvoided, number> = {
@@ -97,7 +98,10 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
     : calculateMinutesLate(data.agreed_time!, data.actual_arrival!)
 
   // 1. Relative Time Score (40%)
-  const relativeTimeScore = Math.min(100, (minutesLate / eventDurationMinutes) * 100)
+  // 5-minute grace period — research shows people mentally round ≤5 min to "on time".
+  // Slightly steeper ramp (×1.15) to compensate, preserving the 100 cap.
+  const adjustedMinutes = Math.max(0, minutesLate - 5)
+  const relativeTimeScore = Math.min(100, (adjustedMinutes / eventDurationMinutes) * 115)
 
   // 2. Event Type Score (20%)
   const eventTypeScore = EVENT_TYPE_SCORES[data.event_type]
@@ -108,7 +112,7 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
   // 4. Excuse Score (10%)
   let excuseScore: number
   if (!data.excuse_type || data.excuse_type === 'none') {
-    excuseScore = 65 // no excuse given
+    excuseScore = 65 // no excuse given — scored poorly but not maximally
   } else {
     excuseScore = data.could_have_avoided
       ? EXCUSE_SCORES[data.could_have_avoided]
@@ -128,14 +132,72 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
     excuseScore * 0.1 +
     noticeScore * 0.1
 
-  // Modifiers
-  if (data.no_show) finalScore *= 1.5
-  if (data.repeat_offender === 'yes_often') finalScore += 10
+  const modifiers: ScoreModifier[] = []
 
-  // Annoyance multiplier — self-reported reaction calibrates the objective score.
-  // annoyance=0 → ×0.5 (halved), annoyance=7+ → ×1.0 (unchanged)
+  // ── Apology modifier ──
+  // A sincere apology is meaningful mitigation. A hollow one signals awareness
+  // of wrongdoing without ownership — often worse than silence.
+  if (data.apologised === 'yes_sincerely') {
+    finalScore = Math.max(0, finalScore - 10)
+    modifiers.push({ label: 'Sincere apology', value: '−10 pts', positive: true })
+  } else if (data.apologised === 'yes_hollow') {
+    finalScore += 5
+    modifiers.push({ label: 'Hollow apology', value: '+5 pts', positive: false })
+  }
+
+  // ── No-show multiplier ──
+  if (data.no_show) {
+    finalScore *= 1.5
+    modifiers.push({ label: 'No-show', value: '×1.5', positive: false })
+  }
+
+  // ── People waiting multiplier ──
+  // Social cost scales with audience size. 8 people waiting 15 min = 120 person-minutes.
+  const peopleWaiting = typeof data.people_waiting === 'number' ? data.people_waiting : 1
+  let groupMultiplier = 1.0
+  if (peopleWaiting >= 8)      groupMultiplier = 1.5
+  else if (peopleWaiting >= 4) groupMultiplier = 1.3
+  else if (peopleWaiting >= 2) groupMultiplier = 1.15
+  if (groupMultiplier > 1.0) {
+    finalScore *= groupMultiplier
+    modifiers.push({
+      label: `${peopleWaiting}${peopleWaiting >= 8 ? '+' : ''} people kept waiting`,
+      value: `×${groupMultiplier}`,
+      positive: false,
+    })
+  }
+
+  // ── Event impact multiplier ──
+  // The actual harm caused matters. "Ruined it entirely" vs "not at all" are very different.
+  const eventImpact = data.event_impact
+  if (eventImpact === 'not_at_all') {
+    finalScore *= 0.85
+    modifiers.push({ label: 'No real impact on event', value: '×0.85', positive: true })
+  } else if (eventImpact === 'significantly') {
+    finalScore *= 1.1
+    modifiers.push({ label: 'Significantly impacted event', value: '×1.1', positive: false })
+  } else if (eventImpact === 'ruined_it') {
+    finalScore *= 1.25
+    modifiers.push({ label: 'Ruined the event', value: '×1.25', positive: false })
+  }
+  // 'slightly' = neutral (×1.0), no modifier shown
+
+  // ── Repeat offender (multiplicative) ──
+  // Attribution theory: a first offense is circumstantial; a pattern is dispositional.
+  // A multiplier better captures this qualitative shift than a flat additive bonus.
+  if (data.repeat_offender === 'yes_often') {
+    finalScore *= 1.25
+    modifiers.push({ label: 'Chronic offender', value: '×1.25', positive: false })
+  } else if (data.repeat_offender === 'yes_occasionally') {
+    finalScore *= 1.1
+    modifiers.push({ label: 'Repeat offender', value: '×1.1', positive: false })
+  }
+
+  // ── Annoyance multiplier ──
+  // Self-reported reaction calibrates the objective score.
+  // annoyance=0 → ×0.5 (halved), annoyance=10 → ×1.0 (unchanged)
   const annoyance = typeof data.annoyance_level === 'number' ? data.annoyance_level : 5
-  const annoyanceMultiplier = Math.min(1.0, 0.5 + (annoyance / 10) * 0.7)
+  const annoyanceMultiplier = Math.min(1.0, 0.5 + (annoyance / 10) * 0.5)
   finalScore *= annoyanceMultiplier
 
   const isExceeded = finalScore > 120
@@ -152,6 +214,7 @@ export function calculateScore(data: Partial<FormData>): ScoreComponents | null 
     verdict: getVerdict(finalScore),
     minutesLate,
     isExceeded,
+    modifiers,
   }
 }
 

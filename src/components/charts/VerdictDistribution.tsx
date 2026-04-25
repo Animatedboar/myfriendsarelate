@@ -49,9 +49,10 @@ export default function VerdictDistribution({ data }: Props) {
         <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip
           formatter={(value: number) => [value, 'Entries']}
-          contentStyle={{ border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 12 }}
+          contentStyle={{ border: '2px solid #1B2A4A', borderRadius: 0, fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
+          cursor={{ fill: 'rgba(27,42,74,0.04)' }}
         />
-        <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+        <Bar dataKey="count">
           {sorted.map((entry) => (
             <Cell key={entry.verdict} fill={COLORS[entry.verdict]} />
           ))}

@@ -6,6 +6,15 @@ export type OffenderRole =
   | 'driver'
   | 'organiser'
 
+export type Relationship =
+  | 'stranger'
+  | 'acquaintance'
+  | 'friend'
+  | 'close_friend'
+  | 'best_friend'
+  | 'partner'
+  | 'family'
+
 export type EventType =
   | 'casual'
   | 'dinner_home'
@@ -25,6 +34,12 @@ export type EventDuration =
   | 'half_day'
   | 'full_day'
 
+export type EventImpact =
+  | 'not_at_all'
+  | 'slightly'
+  | 'significantly'
+  | 'ruined_it'
+
 // Combined notice question: method + rough timing in one
 export type NoticeType =
   | 'no_contact'      // noticeScore = 100
@@ -34,7 +49,7 @@ export type NoticeType =
   | 'texted_late'     // texted <30 min before → noticeScore = 45
   | 'after_arriving'  // told them after arriving → noticeScore = 70
 
-// 'none' = no excuse given (scores 85), otherwise the category
+// 'none' = no excuse given (scores 65), otherwise the category
 export type ExcuseType =
   | 'none'
   | 'emergency'
@@ -87,10 +102,12 @@ export type VerdictKey =
 export interface FormData {
   // Step 1: The Offender & Event
   offender_name: string
+  relationship: Relationship | ''
   offender_role: OffenderRole | ''
   event_description: string
   event_type: EventType | ''
   event_duration: EventDuration | ''
+  people_waiting: number
 
   // Step 2: What Happened
   agreed_time: string
@@ -104,8 +121,15 @@ export interface FormData {
   could_have_avoided: CouldHaveAvoided | ''
   apologised: Apologised | ''
   annoyance_level: number
+  event_impact: EventImpact | ''
   forgiven: Forgiven | ''
   extra_context: string
+}
+
+export interface ScoreModifier {
+  label: string
+  value: string
+  positive: boolean
 }
 
 export interface ScoreComponents {
@@ -118,6 +142,7 @@ export interface ScoreComponents {
   verdict: VerdictKey
   minutesLate: number
   isExceeded: boolean
+  modifiers: ScoreModifier[]
 }
 
 export interface Entry {

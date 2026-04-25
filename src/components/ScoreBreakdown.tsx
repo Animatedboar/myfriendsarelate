@@ -9,13 +9,13 @@ const components = [
     key: 'relativeTimeScore' as const,
     label: 'Relative Lateness',
     weight: '40%',
-    description: 'How late they were relative to how long the event was supposed to last.',
+    description: 'How late they were relative to how long the event was supposed to last. First 5 minutes are a grace period.',
   },
   {
     key: 'eventTypeScore' as const,
     label: 'Event Severity',
     weight: '20%',
-    description: 'A movie has a hard start. A house party does not. This matters.',
+    description: 'A movie has a hard start. A house party does not. An escape room slot is paid and fixed. This matters.',
   },
   {
     key: 'importanceScore' as const,
@@ -44,18 +44,20 @@ function ScoreBar({ value, max = 100 }: { value: number; max?: number }) {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-gray-100 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${color}`}
+          className={`h-full transition-all duration-700 ${color}`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-sm font-semibold text-gray-700 w-8 text-right">{value}</span>
+      <span className="text-sm font-semibold text-gray-700 w-8 text-right tabular-nums">{value}</span>
     </div>
   )
 }
 
 export default function ScoreBreakdown({ scores }: Props) {
+  const activeModifiers = scores.modifiers ?? []
+
   return (
     <div className="space-y-5">
       {components.map((c) => (
@@ -71,10 +73,26 @@ export default function ScoreBreakdown({ scores }: Props) {
         </div>
       ))}
 
-      <div className="pt-4 border-t border-gray-100">
+      {activeModifiers.length > 0 && (
+        <div className="pt-4 border-t-2 border-gray-100">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Modifiers applied</p>
+          <div className="space-y-1.5">
+            {activeModifiers.map((m, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{m.label}</span>
+                <span className={`text-sm font-bold tabular-nums ${m.positive ? 'text-emerald-600' : 'text-ember'}`}>
+                  {m.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="pt-4 border-t-2 border-navy">
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-gray-700">Final Score</span>
-          <span className="text-xl font-black text-ember">
+          <span className="font-bold text-gray-700 uppercase tracking-widest text-xs">Final Score</span>
+          <span className="text-2xl font-black text-ember tabular-nums">
             {scores.isExceeded ? '120+' : scores.finalScore}
           </span>
         </div>

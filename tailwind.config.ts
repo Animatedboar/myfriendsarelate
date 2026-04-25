@@ -39,6 +39,7 @@ const config: Config = {
         'fade-in': 'fadeIn 0.5s ease-out forwards',
         'slide-up': 'slideUp 0.4s ease-out forwards',
         'count-up': 'countUp 0.8s ease-out forwards',
+        'marquee': 'marquee 28s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -52,6 +53,10 @@ const config: Config = {
         countUp: {
           from: { opacity: '0', transform: 'translateY(8px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
     },

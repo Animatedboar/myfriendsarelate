@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormData, ExcuseType, CouldHaveAvoided, Apologised, Forgiven } from '../../../lib/types'
+import type { FormData, ExcuseType, CouldHaveAvoided, Apologised, EventImpact, Forgiven } from '../../../lib/types'
 
 interface Props {
   data: FormData
@@ -8,34 +8,41 @@ interface Props {
 }
 
 const excuseOptions: { value: ExcuseType; label: string; hint: string }[] = [
-  { value: 'none', label: 'No excuse given', hint: 'Silence adds injury to injury' },
-  { value: 'emergency', label: 'Genuine emergency', hint: 'Hard to argue with' },
-  { value: 'traffic', label: 'Traffic / transport', hint: 'The classic' },
-  { value: 'work', label: 'Work / obligation', hint: 'They had to' },
-  { value: 'forgot', label: 'Forgot', hint: 'They actually forgot' },
-  { value: 'overslept', label: 'Overslept', hint: 'The alarm let them down' },
-  { value: 'other', label: 'Other', hint: 'Something else entirely' },
+  { value: 'none',      label: 'No excuse given',     hint: 'Silence adds injury to injury' },
+  { value: 'emergency', label: 'Genuine emergency',   hint: 'Hard to argue with' },
+  { value: 'traffic',   label: 'Traffic / transport', hint: 'The classic' },
+  { value: 'work',      label: 'Work / obligation',   hint: 'They had to' },
+  { value: 'forgot',    label: 'Forgot',              hint: 'They actually forgot' },
+  { value: 'overslept', label: 'Overslept',           hint: 'The alarm let them down' },
+  { value: 'other',     label: 'Other',               hint: 'Something else entirely' },
 ]
 
 const avoidedOptions: { value: CouldHaveAvoided; label: string }[] = [
   { value: 'definitely_not', label: 'Definitely not' },
-  { value: 'probably_not', label: 'Probably not' },
-  { value: 'maybe', label: 'Maybe' },
-  { value: 'probably_yes', label: 'Probably yes' },
+  { value: 'probably_not',   label: 'Probably not' },
+  { value: 'maybe',          label: 'Maybe' },
+  { value: 'probably_yes',   label: 'Probably yes' },
   { value: 'definitely_yes', label: 'Definitely yes' },
 ]
 
-const apologisedOptions: { value: Apologised; label: string }[] = [
-  { value: 'yes_sincerely', label: 'Yes, sincerely' },
-  { value: 'yes_hollow', label: 'Yes — felt hollow' },
-  { value: 'no', label: 'No apology' },
+const apologisedOptions: { value: Apologised; label: string; hint: string }[] = [
+  { value: 'yes_sincerely', label: 'Yes, sincerely', hint: 'Owned it completely' },
+  { value: 'yes_hollow',    label: 'Yes — felt hollow', hint: 'Words without ownership' },
+  { value: 'no',            label: 'No apology',     hint: 'Just moved on' },
+]
+
+const impactOptions: { value: EventImpact; label: string; hint: string }[] = [
+  { value: 'not_at_all',    label: 'Not at all',         hint: 'Barely noticed' },
+  { value: 'slightly',      label: 'Slightly',           hint: 'Minor inconvenience' },
+  { value: 'significantly', label: 'Significantly',      hint: 'The mood shifted' },
+  { value: 'ruined_it',     label: 'Ruined it entirely', hint: 'Couldn\'t recover' },
 ]
 
 const forgivenOptions: { value: Forgiven; label: string }[] = [
   { value: 'yes_completely', label: 'Yes, completely' },
-  { value: 'mostly', label: 'Mostly' },
+  { value: 'mostly',         label: 'Mostly' },
   { value: 'holding_grudge', label: 'Holding a grudge' },
-  { value: 'unresolved', label: 'Still unresolved' },
+  { value: 'unresolved',     label: 'Still unresolved' },
 ]
 
 export default function StepThree({ data, onChange }: Props) {
@@ -43,6 +50,7 @@ export default function StepThree({ data, onChange }: Props) {
 
   return (
     <div className="space-y-8">
+
       <div>
         <label className="form-label">What excuse did they give?</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
@@ -81,15 +89,19 @@ export default function StepThree({ data, onChange }: Props) {
 
       <div>
         <label className="form-label">Did they apologise?</label>
+        <p className="form-hint mb-2">
+          A sincere apology reduces the score. A hollow one — &ldquo;sorry but the traffic was terrible&rdquo; — actually makes it worse.
+        </p>
         <div className="grid grid-cols-3 gap-2 mt-1">
           {apologisedOptions.map((o) => (
             <button
               key={o.value}
               type="button"
-              className={`option-btn text-center ${data.apologised === o.value ? 'selected' : ''}`}
+              className={`option-btn flex flex-col items-start gap-0.5 ${data.apologised === o.value ? 'selected' : ''}`}
               onClick={() => onChange({ apologised: o.value })}
             >
-              {o.label}
+              <span className="font-semibold">{o.label}</span>
+              <span className="text-xs opacity-60">{o.hint}</span>
             </button>
           ))}
         </div>
@@ -98,10 +110,9 @@ export default function StepThree({ data, onChange }: Props) {
       <div>
         <label className="form-label">
           How annoyed were you?{' '}
-          <span className="font-normal text-gray-400">
-            {data.annoyance_level}/10
-          </span>
+          <span className="font-normal text-gray-400">{data.annoyance_level}/10</span>
         </label>
+        <p className="form-hint mb-3">Your reaction calibrates the score against real human experience.</p>
         <input
           type="range"
           min={0}
@@ -109,11 +120,28 @@ export default function StepThree({ data, onChange }: Props) {
           step={1}
           value={data.annoyance_level}
           onChange={(e) => onChange({ annoyance_level: parseInt(e.target.value) })}
-          className="mt-2"
         />
         <div className="flex justify-between text-xs text-gray-400 mt-1">
           <span>Totally fine</span>
           <span>Furious</span>
+        </div>
+      </div>
+
+      <div>
+        <label className="form-label">Did it actually affect the event?</label>
+        <p className="form-hint mb-2">What happened in theory vs. what the lateness actually cost.</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+          {impactOptions.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              className={`option-btn flex flex-col items-start gap-0.5 ${data.event_impact === o.value ? 'selected' : ''}`}
+              onClick={() => onChange({ event_impact: o.value })}
+            >
+              <span className="font-semibold">{o.label}</span>
+              <span className="text-xs opacity-60">{o.hint}</span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -140,7 +168,7 @@ export default function StepThree({ data, onChange }: Props) {
         <textarea
           className="form-input resize-none"
           rows={2}
-          placeholder="Anything the score might be missing..."
+          placeholder="Context the score might be missing..."
           value={data.extra_context}
           onChange={(e) => onChange({ extra_context: e.target.value })}
           maxLength={500}

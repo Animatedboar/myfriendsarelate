@@ -18,7 +18,7 @@ export default function ToleranceCurve({ data }: Props) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={sorted} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+        <CartesianGrid strokeDasharray="2 4" stroke="#e5e7eb" vertical={false} />
         <XAxis
           dataKey="bracket"
           tick={{ fontSize: 11, fill: '#6b7280' }}
@@ -31,11 +31,11 @@ export default function ToleranceCurve({ data }: Props) {
           tick={{ fontSize: 11, fill: '#6b7280' }}
           tickLine={false}
           axisLine={false}
-          label={{ value: 'Avg Annoyance', angle: -90, position: 'insideLeft', fontSize: 11, fill: '#9ca3af' }}
+          label={{ value: 'Annoyance', angle: -90, position: 'insideLeft', fontSize: 11, fill: '#9ca3af' }}
         />
         <Tooltip
           formatter={(value: number) => [value, 'Avg Annoyance (0–10)']}
-          contentStyle={{ border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 12 }}
+          contentStyle={{ border: '2px solid #1B2A4A', borderRadius: 0, fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}
         />
         <Line
           type="monotone"
