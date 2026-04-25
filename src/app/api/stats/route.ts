@@ -6,15 +6,26 @@ export const revalidate = 300 // cache for 5 minutes
 
 export async function GET() {
   try {
-    // Fetch all entries (for small-scale MVP; aggregate server-side)
-    const { data: entries, error } = await supabase
-      .from('entries')
-      .select(
-        'verdict, final_score, event_type, excuse_category, gave_excuse, forgiven, annoyance_level, minutes_late, created_at, offender_name, event_description, no_show, apologised, id'
-      )
-      .order('created_at', { ascending: false })
+    // Fetch all entries via pagination (Supabase caps at 1000 rows per request)
+    const PAGE = 1000
+    let allEntries: any[] = []
+    let from = 0
+    while (true) {
+      const { data, error } = await supabase
+        .from('entries')
+        .select(
+          'verdict, final_score, event_type, excuse_category, gave_excuse, forgiven, annoyance_level, minutes_late, created_at, offender_name, event_description, no_show, apologised, id'
+        )
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE - 1)
+      if (error) throw error
+      if (!data || data.length === 0) break
+      allEntries = allEntries.concat(data)
+      if (data.length < PAGE) break
+      from += PAGE
+    }
+    const entries = allEntries
 
-    if (error) throw error
     if (!entries || entries.length === 0) {
       return NextResponse.json({
         totalEntries: 0,

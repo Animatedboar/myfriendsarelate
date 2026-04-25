@@ -20,21 +20,21 @@ async function getQuickStats() {
 }
 
 const VERDICT_TIERS: [VerdictKey, string, string, string, string][] = [
-  ['saint',           '0–15',   'bg-emerald-500 text-white',       'text-white/30', '✦ Basically fine.'],
-  ['fashionably_late','16–30',  'bg-amber-400   text-white',       'text-white/30', '✦ Annoying but forgivable.'],
-  ['chronic_offender','31–50',  'bg-orange-500  text-white',       'text-white/30', '✦ A documented pattern.'],
-  ['disrespecter',    '51–70',  'bg-red-500     text-white',       'text-white/30', '✦ Context makes it worse.'],
-  ['repeat_criminal', '71–89',  'bg-red-700     text-white',       'text-white/30', '✦ Consider having words.'],
-  ['time_terrorist',  '90–120+','bg-gray-950    text-red-400',     'text-red-900',  '✦ Forgiveness is optional.'],
+  ['saint',           '0–22',   'bg-emerald-500 text-white',       'text-white/30', '✦ Within normal tolerance.'],
+  ['fashionably_late','23–40',  'bg-amber-400   text-white',       'text-white/30', '✦ Annoying but forgivable.'],
+  ['chronic_offender','41–58',  'bg-orange-500  text-white',       'text-white/30', '✦ Genuinely inconsiderate.'],
+  ['disrespecter',    '59–75',  'bg-red-500     text-white',       'text-white/30', '✦ A real lack of respect.'],
+  ['repeat_criminal', '76–92',  'bg-red-700     text-white',       'text-white/30', '✦ Serious breach of trust.'],
+  ['time_terrorist',  '93–120+','bg-gray-950    text-red-400',     'text-red-900',  '✦ Forgiveness is optional.'],
 ]
 
 const TICKER_ITEMS = [
-  '94 · The Time Terrorist',
-  '78 · The Repeat Criminal',
-  '62 · The Disrespecter',
-  '43 · The Chronic Offender',
-  '22 · The Fashionably Late',
-  '8 · The Saint',
+  '97 · The Time Terrorist',
+  '81 · The Repeat Criminal',
+  '64 · The Disrespecter',
+  '47 · The Inconsiderate',
+  '29 · The Fashionably Late',
+  '11 · The Saint',
   'No notice given',
   'No excuse offered',
   'The host was the one who was late',
